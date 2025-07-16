@@ -33,16 +33,8 @@ func main() {
 	case "cat-file":
 		fmt.Println("receive cat file")
 		fileHash := os.Args[3]
-		path := Hash2FilePath(fileHash)
-		fmt.Println("cat-file path:" + path)
-		fc, err := os.ReadFile(path)
-		if err != nil {
-			panic(err)
-		}
-		obj := ParseObjectFile(fc)
-		if obj != nil {
-			panic(err)
-		}
+		p := NewFileParser(fileHash)
+		obj := p.ParseObject()
 		fmt.Print(obj.String())
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)

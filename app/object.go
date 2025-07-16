@@ -8,16 +8,68 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
-func Hash2FilePath(hash string) string {
-	return filepath.Join(".git/objects", hash[0:2], hash[2:])
+type ObjectParser struct {
+	hash string
+
+	objFilePath string
+	fc          []byte
+
+	b *bytes.Buffer
+}
+
+const (
+	hashLen = 40
+)
+
+func NewFileParser(hash string) *ObjectParser {
+	if len(hash) != hashLen {
+		panic(fmt.Sprintf("hash len must be:%d, instead of :%d", hashLen, len(hash)))
+	}
+	return &ObjectParser{
+		hash: hash,
+	}
+}
+
+func (p *ObjectParser) ParseObject() Object {
+	p.parseFilePath()
+	p.readFile()
+	p.decodeFileContent()
+	return p.toObject()
+}
+
+func (p *ObjectParser) parseFilePath() {
+	p.objFilePath = filepath.Join(".git/objects", p.hash[0:2], p.hash[2:])
+}
+
+func (p *ObjectParser) readFile() {
+	fc, err := os.ReadFile(p.objFilePath)
+	if err != nil {
+		panic(err)
+	}
+	p.fc = fc
+}
+
+func (p *ObjectParser) decodeFileContent() {
+	r, err := zlib.NewReader(bytes.NewReader(p.fc))
+	if err != nil {
+		panic(err)
+	}
+	defer r.Close()
+
+	buf := &bytes.Buffer{}
+	n, err := io.Copy(buf, r)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("read %d bytes after decode, from path:%s\n", n, p.objFilePath)
+
+	p.b = buf
 }
 
 type Object interface {
 	fmt.Stringer
-
 	ObjectName() string
 }
 
@@ -26,32 +78,23 @@ type Blob struct {
 }
 
 func (b *Blob) String() string {
-	r, err := zlib.NewReader(bytes.NewReader(b.b))
-	if err != nil {
-		panic(err)
-	}
-	sb := &strings.Builder{}
-	io.Copy(sb, r)
-	_ = r.Close()
-	return sb.String()
+	return string(b.b)
 }
 
-func (*Blob) ObjectName() string {
+func (b *Blob) ObjectName() string {
 	return "blob"
 }
 
-func ParseObjectFile(fc []byte) Object {
-	b := bytes.NewBuffer(fc)
-	PrintBytes(b.Bytes())
-	// blob <size>\0<content>
-	objectType, err := b.ReadString(0x20)
+func (p *ObjectParser) toObject() Object {
+	objectType, err := p.b.ReadString(0x20)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("object type is:%s\b", objectType)
 	switch objectType {
 	case "blob":
-		_, _ = b.ReadByte()
-		s, err := b.ReadString(0x00)
+		_, _ = p.b.ReadByte()
+		s, err := p.b.ReadString(0x00)
 		if err != nil {
 			panic(err)
 		}
@@ -59,17 +102,16 @@ func ParseObjectFile(fc []byte) Object {
 		if err != nil {
 			panic(err)
 		}
-		_, _ = b.ReadByte()
 		content := make([]byte, size)
-		n, err := b.Read(content)
+		n, err := io.ReadFull(p.b, content)
 		if err != nil {
 			panic(err)
 		}
 		if n != size {
-			_, _ = fmt.Fprintf(os.Stderr, "read bytes len is %d,want:%d", n, size)
+			panic(fmt.Errorf("read:%d, want:%d", n, size))
 		}
 		return &Blob{b: content}
 	default:
-		return nil
+		panic("not supported for:" + objectType)
 	}
 }
