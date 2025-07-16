@@ -31,7 +31,6 @@ func main() {
 
 		fmt.Println("Initialized git directory")
 	case "cat-file":
-		fmt.Println("receive cat file")
 		fileHash := os.Args[3]
 		p := NewFileParser(fileHash)
 		obj := p.ParseObject()

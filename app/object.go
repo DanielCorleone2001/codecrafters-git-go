@@ -64,11 +64,10 @@ func (p *ObjectParser) decodeFileContent() {
 	defer r.Close()
 
 	buf := &bytes.Buffer{}
-	n, err := io.Copy(buf, r)
+	_, err = io.Copy(buf, r)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("read %d bytes after decode, from path:%s\n", n, p.objFilePath)
 
 	p.b = buf
 }
