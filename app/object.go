@@ -16,7 +16,8 @@ type ObjectParser struct {
 	objFilePath string
 	fc          []byte
 
-	b *bytes.Buffer
+	b       *bytes.Buffer
+	withAbs bool
 }
 
 const (
@@ -40,7 +41,11 @@ func (p *ObjectParser) ParseObject() Object {
 }
 
 func (p *ObjectParser) parseFilePath() {
-	p.objFilePath = filepath.Join(".git/objects", p.hash[0:2], p.hash[2:])
+	path := filepath.Join(".git/objects", p.hash[0:2], p.hash[2:])
+	if p.withAbs {
+		path = filepath.Join("/Users/daniel/code/go/codecrafter/codecrafters-git-go", path)
+	}
+	p.objFilePath = path
 }
 
 func (p *ObjectParser) readFile() {
@@ -85,23 +90,34 @@ func (b *Blob) ObjectName() string {
 	return "blob"
 }
 
-func (p *ObjectParser) toObject() Object {
-	objectType, err := p.b.ReadString(0x20)
+func (p *ObjectParser) readUntil(delim byte) []byte {
+	l := bytes.IndexByte(p.b.Bytes(), delim)
+	b := make([]byte, l)
+	n, err := io.ReadFull(p.b, b)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("object type is:%s\b", objectType)
-	switch objectType {
+	if n != l {
+		panic(fmt.Sprintf("read:%d, want:%d", n, l))
+	}
+	return b
+}
+
+func (p *ObjectParser) parseObjectType() string {
+	t := p.readUntil(0x20)
+	return string(t)
+}
+
+func (p *ObjectParser) toObject() Object {
+	switch objectType := p.parseObjectType(); objectType {
 	case "blob":
 		_, _ = p.b.ReadByte()
-		s, err := p.b.ReadString(0x00)
+		s := p.readUntil(0x00)
+		size, err := strconv.Atoi(string(s))
 		if err != nil {
 			panic(err)
 		}
-		size, err := strconv.Atoi(s)
-		if err != nil {
-			panic(err)
-		}
+		_, _ = p.b.ReadByte()
 		content := make([]byte, size)
 		n, err := io.ReadFull(p.b, content)
 		if err != nil {
