@@ -42,6 +42,7 @@ func (*Blob) ObjectName() string {
 
 func ParseObjectFile(fc []byte) Object {
 	b := bytes.NewBuffer(fc)
+	PrintBytes(b)
 	// blob <size>\0<content>
 	objectType, err := b.ReadString(0x20)
 	if err != nil {
