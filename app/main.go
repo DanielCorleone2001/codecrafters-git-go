@@ -34,14 +34,16 @@ func main() {
 		fmt.Println("receive cat file")
 		fileHash := os.Args[3]
 		path := Hash2FilePath(fileHash)
+		fmt.Println("cat-file path:" + path)
 		fc, err := os.ReadFile(path)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, err.Error())
+			panic(err)
 		}
 		obj := ParseObjectFile(fc)
 		if obj != nil {
-			fmt.Print(obj.String())
+			panic(err)
 		}
+		fmt.Print(obj.String())
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
 		os.Exit(1)

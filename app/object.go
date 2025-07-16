@@ -45,24 +45,24 @@ func ParseObjectFile(fc []byte) Object {
 	// blob <size>\0<content>
 	objectType, err := b.ReadString(0x20)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, err.Error())
+		panic(err)
 	}
 	switch objectType {
 	case "blob":
 		_, _ = b.ReadByte()
 		s, err := b.ReadString(0x00)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, err.Error())
+			panic(err)
 		}
 		size, err := strconv.Atoi(s)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, err.Error())
+			panic(err)
 		}
 		_, _ = b.ReadByte()
 		content := make([]byte, size)
 		n, err := b.Read(content)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, err.Error())
+			panic(err)
 		}
 		if n != size {
 			_, _ = fmt.Fprintf(os.Stderr, "read bytes len is %d,want:%d", n, size)
