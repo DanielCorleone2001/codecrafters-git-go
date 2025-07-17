@@ -49,15 +49,22 @@ func (w *ObjectWriter) calculateHash() {
 }
 
 func (w *ObjectWriter) createAndFile() {
-	if err := os.MkdirAll(filepath.Join(".git", "objects", w.hash[0:2]), 0755); err != nil {
+	if err := os.MkdirAll(w.objectPathPrefix(), 0755); err != nil {
 		panic(err)
 	}
 	w.encodeContent()
-	if err := os.WriteFile(filepath.Join(w.hash[0:2], w.hash[2:]), w.cryptoBuf.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(w.objectPathPrefix(), w.objectFileName()), w.cryptoBuf.Bytes(), 0644); err != nil {
 		panic(err)
 	}
 }
 
+func (w *ObjectWriter) objectPathPrefix() string {
+	return filepath.Join(".git", "objects", w.hash[0:2])
+}
+
+func (w *ObjectWriter) objectFileName() string {
+	return w.hash[2:]
+}
 func (w *ObjectWriter) encodeContent() {
 	ww := zlib.NewWriter(w.cryptoBuf)
 	if _, err := ww.Write(w.buf.Bytes()); err != nil {
