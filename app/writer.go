@@ -21,7 +21,9 @@ type ObjectWriter struct {
 
 func NewObjectWriter(content []byte) *ObjectWriter {
 	return &ObjectWriter{
-		content: content,
+		content:   content,
+		buf:       &bytes.Buffer{},
+		cryptoBuf: &bytes.Buffer{},
 	}
 }
 
