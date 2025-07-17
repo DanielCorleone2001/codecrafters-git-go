@@ -35,6 +35,14 @@ func main() {
 		p := NewFileParser(fileHash)
 		obj := p.ParseObject()
 		fmt.Print(obj.String())
+	case "hash-object":
+		fileName := os.Args[3]
+		content, err := os.ReadFile(fileName)
+		if err != nil {
+			panic(err)
+		}
+		w := NewObjectWriter(content)
+		w.HashObject()
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
 		os.Exit(1)
