@@ -49,7 +49,7 @@ func (w *ObjectWriter) calculateHash() {
 }
 
 func (w *ObjectWriter) createAndFile() {
-	if err := os.MkdirAll(w.hash[0:2], 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(".git", "objects", w.hash[0:2]), 0755); err != nil {
 		panic(err)
 	}
 	w.encodeContent()
