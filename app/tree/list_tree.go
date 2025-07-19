@@ -40,11 +40,7 @@ func (l *ListTree) printTreeEntries() {
 	sb := &strings.Builder{}
 	t := l.p.ToTree()
 	for _, e := range t.Entries {
-		if l.nameOnly {
-			_, _ = fmt.Fprintf(sb, "%s\n", e.Name)
-		} else {
-			_, _ = fmt.Fprintf(sb, "%s %s %s    %s", e.Mode, e.Mode, e.Sha, e.Name)
-		}
+		_, _ = fmt.Fprintf(sb, "%s\n", e.String(l.nameOnly))
 	}
 	_, _ = fmt.Fprintf(os.Stdout, sb.String())
 }

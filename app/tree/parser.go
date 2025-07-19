@@ -45,11 +45,12 @@ func (p *FileParser) fileName() string {
 }
 
 func (p *FileParser) readFileContent() {
-	b, err := os.ReadFile(filepath.Join(p.filePath(), p.fileName()))
+	path := filepath.Join(p.filePath(), p.fileName())
+	b, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
-	p.fileBuf = bytes.NewBuffer(b)
+	p.fileBuf = utils.ZlibDecode(b)
 }
 
 func (p *FileParser) parserHeader() {
