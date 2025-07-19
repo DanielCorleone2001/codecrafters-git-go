@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"github.com/codecrafters-io/git-starter-go/app/consts"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -38,7 +39,7 @@ func (w *ObjectWriter) calculateHash() {
 	buf.Grow(len(w.content) + 128)
 
 	buf.WriteString("blob")
-	buf.WriteByte(0x20)
+	buf.WriteByte(consts.SpaceASCIIByte)
 	buf.WriteString(strconv.Itoa(len(w.content)))
 	buf.WriteByte(0x00)
 	buf.Write(w.content)

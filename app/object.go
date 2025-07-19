@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"compress/zlib"
 	"fmt"
+	"github.com/codecrafters-io/git-starter-go/app/consts"
+	"github.com/codecrafters-io/git-starter-go/app/utils"
 	"io"
 	"os"
 	"path/filepath"
@@ -103,16 +105,15 @@ func (p *ObjectParser) readUntil(delim byte) []byte {
 }
 
 func (p *ObjectParser) parseObjectType() string {
-	t := p.readUntil(0x20)
-	return string(t)
+	return utils.ReadStringUtil(p.b, consts.SpaceASCIIByte)
 }
 
 func (p *ObjectParser) toObject() Object {
 	switch objectType := p.parseObjectType(); objectType {
 	case "blob":
 		_, _ = p.b.ReadByte()
-		s := p.readUntil(0x00)
-		size, err := strconv.Atoi(string(s))
+		s := utils.ReadStringUtil(p.b, consts.NullASCIIByte)
+		size, err := strconv.Atoi(s)
 		if err != nil {
 			panic(err)
 		}

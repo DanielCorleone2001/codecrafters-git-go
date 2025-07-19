@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/codecrafters-io/git-starter-go/app/tree"
 	"os"
+	"strings"
 )
 
 // Usage: your_program.sh <command> <arg1> <arg2> ...
@@ -43,6 +45,15 @@ func main() {
 		}
 		w := NewObjectWriter(content)
 		w.HashObject()
+	case "ls-tree":
+		l := tree.NewListTreeOp()
+		if strings.Contains(os.Args[2], "name-only") {
+			l.WithNameOnly(true)
+			l.WithTreeSHA(os.Args[3])
+		} else {
+			l.WithTreeSHA(os.Args[2])
+		}
+		l.ListTreeContent()
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
 		os.Exit(1)
