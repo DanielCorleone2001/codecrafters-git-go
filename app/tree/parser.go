@@ -55,6 +55,7 @@ func (p *FileParser) readFileContent() {
 		panic(err)
 	}
 	p.fileBuf = utils.ZlibDecode(b)
+	fmt.Printf("file content:[%s]\n", p.fileBuf.String())
 }
 
 func (p *FileParser) parserHeader() {
