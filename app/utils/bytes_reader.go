@@ -13,6 +13,9 @@ type IBytes interface {
 
 func ReadBytesUtil(bb IBytes, delim byte) []byte {
 	l := bytes.IndexByte(bb.Bytes(), delim)
+	if l < 0 {
+		panic(fmt.Sprintf("not found delim:%b in [%s]", delim, bb.Bytes()))
+	}
 	b := make([]byte, l)
 	n, err := io.ReadFull(bb, b)
 	if err != nil {
