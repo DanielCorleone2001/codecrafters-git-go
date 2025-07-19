@@ -25,6 +25,10 @@ func NewTreeFileParser(sha string) *FileParser {
 		treeSha:    sha,
 		fileBuf:    &bytes.Buffer{},
 		entriesBuf: &bytes.Buffer{},
+		t: &Tree{
+			size:    0,
+			Entries: make([]*Entry, 0),
+		},
 	}
 }
 
