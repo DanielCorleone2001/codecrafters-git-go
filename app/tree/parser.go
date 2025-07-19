@@ -55,7 +55,6 @@ func (p *FileParser) readFileContent() {
 		panic(err)
 	}
 	p.fileBuf = utils.ZlibDecode(b)
-	fmt.Printf("file content:[%s]\n", p.fileBuf.String())
 }
 
 func (p *FileParser) parserHeader() {
@@ -78,11 +77,8 @@ func (p *FileParser) parseEntries() {
 
 	read := 0
 	for read < p.size {
-		fmt.Println(fmt.Sprintf("read:%d, size:%d", read, p.size))
 		read += p.readSingleEntry()
-		fmt.Println(fmt.Sprintf("read incr to:%d", read))
 	}
-
 }
 
 func (p *FileParser) readEntries2Buf() {
@@ -111,12 +107,13 @@ func (p *FileParser) readSingleEntry() int {
 	if n != 20 {
 		panic(fmt.Errorf("read:%d, want:%d", n, 20))
 	}
-
-	p.t.Entries = append(p.t.Entries, &Entry{
+	e := &Entry{
 		Mode: mode,
 		Name: name,
 		Sha:  [20]byte(sha),
-	})
+	}
 
-	return len(mode) + 1 + len(name) + 20
+	p.t.Entries = append(p.t.Entries, e)
+
+	return len(mode) + 2 + len(name) + 20
 }

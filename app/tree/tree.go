@@ -18,16 +18,16 @@ func (e *Entry) String(nameOnly bool) string {
 	if nameOnly {
 		return e.Name
 	}
-	return fmt.Sprintf("%d %s %s    %s", e.filePermission(), e.Mode, e.Sha, e.Name)
+	return fmt.Sprintf("%s %s %x    %s", e.Mode, e.Mode, e.Sha, e.Name)
 }
 
-func (e *Entry) filePermission() int {
+func (e *Entry) typeName() string {
 	switch e.Mode {
-	case "blob":
-		return 100644
-	case "tree":
-		return 40000
+	case "100644":
+		return "blob"
+	case "40000":
+		return "tree"
 	default:
-		return 100644 // regular file
+		return "blob" // regular file
 	}
 }

@@ -1,0 +1,4 @@
+build.sh
+go.mod
+go.sum
+main
