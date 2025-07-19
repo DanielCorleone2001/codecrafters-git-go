@@ -77,7 +77,9 @@ func (p *FileParser) parseEntries() {
 
 	read := 0
 	for read < p.size {
+		fmt.Println(fmt.Sprintf("read:%d, size:%d", read, p.size))
 		read += p.readSingleEntry()
+		fmt.Println(fmt.Sprintf("read incr to:%d", read))
 	}
 
 }
